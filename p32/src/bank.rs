@@ -1,4 +1,6 @@
-#[derive(Debug)]
+use std::fmt;
+
+#[derive(Debug, Clone)]
 pub struct User {
     name: String,
     credit_line: u64,
@@ -15,12 +17,12 @@ impl User {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Bank {
     users: Vec<User>,
     name: String,
     credit_interest: u64, // in basis points (0.01%)
-    debit_interest: u64, // in basis points (0.01%)
+    debit_interest: u64,  // in basis points (0.01%)
 }
 
 impl Bank {
@@ -37,27 +39,59 @@ impl Bank {
         self.users.push(user);
     }
 
-    // Other methods for managing the bank
-}
+    pub fn calc_balance(&self) -> (u64, u64) {
+        let (mut liabilities, mut assets) = (0, 0);
+        for user in &self.users {
+            if user.balance < 0 {
+                liabilities += user.balance.abs() as u64;
+            } else {
+                assets += user.balance as u64;
+            }
+        }
+        (liabilities, assets)
+    }
 
-// Derive traits for User and Bank
-impl Clone for User {
-    fn clone(&self) -> Self {
-        Self {
-            name: self.name.clone(),
-            credit_line: self.credit_line,
-            balance: self.balance,
+    pub fn transfer_funds(&mut self, from_user: &str, to_user: &str, amount: u64) -> Result<(), String> {
+        let from_user_index = self.users.iter().position(|u| u.name == from_user);
+        let to_user_index = self.users.iter().position(|u| u.name == to_user);
+        
+        if let (Some(from_index), Some(to_index)) = (from_user_index, to_user_index) {
+            let from_balance = self.users[from_index].balance;
+            let to_balance = self.users[to_index].balance;
+
+            if from_balance < amount as i64 {
+                return Err(format!("User '{}' does not have sufficient funds", from_user));
+            }
+
+            if to_balance.checked_add(amount as i64).is_none() {
+                return Err("Transfer amount would cause overflow for recipient".to_string());
+            }
+
+            self.users[from_index].balance -= amount as i64;
+            self.users[to_index].balance += amount as i64;
+
+            Ok(())
+        } else {
+            Err("One or both users not found".to_string())
+        }
+    }
+
+    pub fn accrue_interest(&mut self) {
+        for user in &mut self.users {
+            if user.balance < 0 {
+                let interest = (-user.balance as f64 * self.debit_interest as f64 / 10_000.0) as i64;
+                user.balance -= interest;
+            } else {
+                let interest = (user.balance as f64 * self.credit_interest as f64 / 10_000.0) as i64;
+                user.balance += interest;
+            }
         }
     }
 }
 
-impl Clone for Bank {
-    fn clone(&self) -> Self {
-        Self {
-            users: self.users.clone(),
-            name: self.name.clone(),
-            credit_interest: self.credit_interest,
-            debit_interest: self.debit_interest,
-        }
+impl fmt::Display for Bank {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Bank: {}\nUsers: {:?}\nCredit Interest: {} basis points\nDebit Interest: {} basis points", 
+                self.name, self.users, self.credit_interest, self.debit_interest)
     }
 }
