@@ -10,16 +10,24 @@ fn main() {
     my_bank.add_user(user1.clone());
     my_bank.add_user(user2.clone());
 
-    println!("Initial Bank State:");
+    let user3 = User::new("Charlie".to_string(), 3000, 1000);
+    let user4 = User::new("Alice".to_string(), 1000, 200);
+
+    let mut other_bank = Bank::new("OtherBank".to_string(), 5, 15);
+    other_bank.add_user(user3.clone());
+    other_bank.add_user(user4.clone());
+
+    println!("Initial State of MyBank:");
     println!("{}", my_bank);
 
-    my_bank.transfer_funds("Bob", "Alice", 300).unwrap();
-    my_bank.accrue_interest();
+    println!("Initial State of OtherBank:");
+    println!("{}", other_bank);
 
-    println!("Bank State After Transfer and Accruing Interest:");
+    my_bank.merge_bank(&mut other_bank);
+
+    println!("State of MyBank After Merge:");
     println!("{}", my_bank);
 
-    let (liabilities, assets) = my_bank.calc_balance();
-    println!("Total Bank Liabilities: {}", liabilities);
-    println!("Total Bank Assets: {}", assets);
+    println!("State of OtherBank After Merge:");
+    println!("{}", other_bank);
 }

@@ -15,6 +15,18 @@ impl User {
             balance,
         }
     }
+
+    pub fn get_name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn get_balance(&self) -> i64 {
+        self.balance
+    }
+
+    pub fn add_balance(&mut self, amount: i64) {
+        self.balance += amount;
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -86,6 +98,17 @@ impl Bank {
                 user.balance += interest;
             }
         }
+    }
+
+    pub fn merge_bank(&mut self, other_bank: &mut Bank) {
+        for other_user in &other_bank.users {
+            if let Some(user) = self.users.iter_mut().find(|u| u.name == other_user.name) {
+                user.add_balance(other_user.get_balance());
+            } else {
+                self.add_user(other_user.clone());
+            }
+        }
+        other_bank.users.clear();
     }
 }
 
