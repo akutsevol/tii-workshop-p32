@@ -1,22 +1,27 @@
 mod shapes;
 
 fn main() {
-    use shapes::{biggest_area, Circle, Rectangle, Shape};
+    use shapes::*;
 
-    let mut circle = Circle { radius: 5.0 };
-    let mut rectangle = Rectangle { width: 4.0, height: 6.0 };
+    let shapes1: Vec<Box<dyn Shape>> = vec![
+        Box::new(Circle { radius: 1.0 }),
+        Box::new(Rectangle { width: 2.0, height: 3.0 }),
+    ];
 
-    circle.print_properties();
-    rectangle.print_properties();
+    let shapes2: Vec<Box<dyn Shape>> = vec![
+        Box::new(Triangle { a: 3.0, b: 4.0, c: 5.0 }),
+        Box::new(Point),
+    ];
 
-    circle.scale(2.0);
-    rectangle.scale(5.5);
+    let result = biggest_perimeter_to_area_ratio(&shapes1, &shapes2);
 
-    println!("\nAfter scaling:");
-    circle.print_properties();
-    rectangle.print_properties();
+    match result {
+        SliceChoice::First(_) => println!("Slice 1 has the biggest perimeter to area ratio"),
+        SliceChoice::Second(_) => println!("Slice 2 has the biggest perimeter to area ratio"),
+    }
 
-    let biggest = biggest_area(&circle, &rectangle);
-    println!("\nShape with the biggest area:");
-    biggest.print_properties();
+    for shape in shapes1.iter().chain(shapes2.iter()) {
+        shape.print_properties();
+        println!("Area to Perimeter Ratio: {}", shape.area_to_perimeter());
+    }
 }
