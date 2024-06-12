@@ -3,6 +3,7 @@ use std::fmt;
 #[derive(Debug, Clone)]
 pub struct User {
     name: String,
+    #[allow(dead_code)]
     credit_line: u64,
     balance: i64, // Positive number means debit, negative credit
 }
@@ -43,7 +44,7 @@ impl Bank {
         let (mut liabilities, mut assets) = (0, 0);
         for user in &self.users {
             if user.balance < 0 {
-                liabilities += user.balance.abs() as u64;
+                liabilities += user.balance.unsigned_abs();
             } else {
                 assets += user.balance as u64;
             }
@@ -51,16 +52,24 @@ impl Bank {
         (liabilities, assets)
     }
 
-    pub fn transfer_funds(&mut self, from_user: &str, to_user: &str, amount: u64) -> Result<(), String> {
+    pub fn transfer_funds(
+        &mut self,
+        from_user: &str,
+        to_user: &str,
+        amount: u64,
+    ) -> Result<(), String> {
         let from_user_index = self.users.iter().position(|u| u.name == from_user);
         let to_user_index = self.users.iter().position(|u| u.name == to_user);
-        
+
         if let (Some(from_index), Some(to_index)) = (from_user_index, to_user_index) {
             let from_balance = self.users[from_index].balance;
             let to_balance = self.users[to_index].balance;
 
             if from_balance < amount as i64 {
-                return Err(format!("User '{}' does not have sufficient funds", from_user));
+                return Err(format!(
+                    "User '{}' does not have sufficient funds",
+                    from_user
+                ));
             }
 
             if to_balance.checked_add(amount as i64).is_none() {
@@ -79,10 +88,12 @@ impl Bank {
     pub fn accrue_interest(&mut self) {
         for user in &mut self.users {
             if user.balance < 0 {
-                let interest = (-user.balance as f64 * self.debit_interest as f64 / 10_000.0) as i64;
+                let interest =
+                    (-user.balance as f64 * self.debit_interest as f64 / 10_000.0) as i64;
                 user.balance -= interest;
             } else {
-                let interest = (user.balance as f64 * self.credit_interest as f64 / 10_000.0) as i64;
+                let interest =
+                    (user.balance as f64 * self.credit_interest as f64 / 10_000.0) as i64;
                 user.balance += interest;
             }
         }
