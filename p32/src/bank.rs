@@ -20,7 +20,7 @@ pub struct Bank {
     users: Vec<User>,
     name: String,
     credit_interest: u64, // in basis points (0.01%)
-    debit_interest: u64, // in basis points (0.01%)
+    debit_interest: u64,  // in basis points (0.01%)
 }
 
 impl Bank {
