@@ -5,11 +5,18 @@ fn main() {
 
     let shapes1: Vec<Box<dyn Shape>> = vec![
         Box::new(Circle { radius: 1.0 }),
-        Box::new(Rectangle { width: 2.0, height: 3.0 }),
+        Box::new(Rectangle {
+            width: 2.0,
+            height: 3.0,
+        }),
     ];
 
     let shapes2: Vec<Box<dyn Shape>> = vec![
-        Box::new(Triangle { a: 3.0, b: 4.0, c: 5.0 }),
+        Box::new(Triangle {
+            a: 3.0,
+            b: 4.0,
+            c: 5.0,
+        }),
         Box::new(Point),
     ];
 
