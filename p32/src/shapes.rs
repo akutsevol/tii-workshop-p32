@@ -3,6 +3,7 @@ pub trait Shape {
     fn perimeter(&self) -> f32;
     fn area(&self) -> f32;
     fn scale(&mut self, factor: f32);
+    #[allow(dead_code)]
     fn area_to_perimeter(&self) -> f32 {
         self.area() / self.perimeter()
     }
